@@ -31,7 +31,7 @@ export default function ListingForm() {
         ...empty,
         ...data,
         amenities: data.amenities.join(', '),
-        imageUrl: data.images[0] || '',
+        imageUrl: data.images?.join(', ') || '',
       })
     );
   }, [id, isEdit]);
@@ -55,7 +55,9 @@ export default function ListingForm() {
       bedrooms: Number(form.bedrooms),
       amenities: amenities.split(',').map((a) => a.trim()).filter(Boolean),
     };
-    if (imageUrl) payload.images = [imageUrl];
+    if (imageUrl) {
+      payload.images = imageUrl.split(',').map((u) => u.trim()).filter(Boolean);
+    }
     try {
       if (isEdit) await api.put(`/listings/${id}`, payload);
       else await api.post('/listings', payload);
@@ -90,7 +92,7 @@ export default function ListingForm() {
         </label>
       </div>
       <input placeholder="Amenities (comma separated: WiFi, AC, Parking)" value={form.amenities} onChange={set('amenities')} />
-      <input placeholder="Image URL (optional)" value={form.imageUrl} onChange={set('imageUrl')} />
+      <input placeholder="Image URLs (comma separated: https://..., https://...)" value={form.imageUrl} onChange={set('imageUrl')} />
       {error && <p className="error">{error}</p>}
       <button className="btn">{isEdit ? 'Save changes' : 'Publish listing'}</button>
     </form>

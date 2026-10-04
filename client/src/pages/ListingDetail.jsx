@@ -9,6 +9,7 @@ export default function ListingDetail() {
   const { id } = useParams();
   const [listing, setListing] = useState(null);
   const [error, setError] = useState('');
+  const [activeImage, setActiveImage] = useState(0);
 
   const load = () =>
     api
@@ -23,6 +24,10 @@ export default function ListingDetail() {
   if (error) return <p className="error">{error}</p>;
   if (!listing) return <Loader />;
 
+  const images = listing.images?.length > 0 ? listing.images : [];
+  const prevImage = () => setActiveImage((curr) => (curr > 0 ? curr - 1 : images.length - 1));
+  const nextImage = () => setActiveImage((curr) => (curr < images.length - 1 ? curr + 1 : 0));
+
   return (
     <section>
       <h1>{listing.title}</h1>
@@ -31,8 +36,33 @@ export default function ListingDetail() {
         {listing.city}, {listing.state}
       </p>
 
-      {/* TODO: image gallery / carousel when a listing has multiple images */}
-      <img className="hero-img" src={listing.images[0]} alt={listing.title} />
+      {images.length > 0 && (
+        <div className="gallery-container">
+          <div className="gallery-main">
+            <img src={images[activeImage] || images[0]} alt={`${listing.title} - ${activeImage + 1}`} />
+            {images.length > 1 && (
+              <>
+                <button type="button" className="gallery-btn prev" onClick={prevImage} aria-label="Previous image">‹</button>
+                <button type="button" className="gallery-btn next" onClick={nextImage} aria-label="Next image">›</button>
+                <span className="gallery-badge">{activeImage + 1} / {images.length}</span>
+              </>
+            )}
+          </div>
+          {images.length > 1 && (
+            <div className="gallery-thumbs">
+              {images.map((img, idx) => (
+                <img
+                  key={idx}
+                  src={img}
+                  alt={`Thumbnail ${idx + 1}`}
+                  className={`gallery-thumb ${idx === activeImage ? 'active' : ''}`}
+                  onClick={() => setActiveImage(idx)}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="detail-layout">
         <div>
